@@ -1,0 +1,19 @@
+freeze_graph \
+  --input_graph=graph.pbtxt \
+  --input_checkpoint=model.ckpt-2000 \
+  --input_binary=false \
+  --output_graph=frozen.pb \
+  --output_node_names=input_tensor,prediction
+
+
+freeze_graph --input_graph=graph.pbtxt --input_checkpoint=model.ckpt-2000 --input_binary=false --output_graph=frozen.pb --output_node_names=input_tensor,prediction
+
+tflite_convert \
+  --output_file=movenet_graph.tflite \
+  --output_format=TFLITE
+  --graph_def_file=frozen.pb \
+  --input_arrays=input_tensor\
+  --output_arrays=prediction
+  --input_shapes=1,30
+
+tflite_convert --output_file=movenet_graph.tflite --output_format=TFLITE --graph_def_file=frozen.pb --input_arrays=input_tensor --output_arrays=prediction --input_shapes=1,30
