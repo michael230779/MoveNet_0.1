@@ -36,7 +36,7 @@ train_labels = np.concatenate([train_running_labels, train_walking_labels], axis
 test_labels = np.concatenate([test_running_labels, test_walking_labels], axis=0)
 
 
-# write input functions which need to yield a (feature dict, labels) to allow for use of Estimator
+# write train and test input functions which need to yield a (feature dict, labels) to allow for use of Estimator API
 def train_input_fn():
     dataset = tf.data.Dataset.from_tensor_slices(({"features": train_features}, train_labels))
 
@@ -71,7 +71,7 @@ def model_fn(features, labels, mode, params):
         net = tf.layers.dense(net, units=units, activation=tf.nn.relu)
 
     # apply dropout but only in training mode, seed is necessary to allow for tflite conversion
-    # net = tf.layers.dropout(net, rate=0.2, seed=1, training=mode == tf.estimator.ModeKeys.TRAIN)
+    net = tf.layers.dropout(net, rate=0.2, seed=1, training=mode == tf.estimator.ModeKeys.TRAIN)
 
     logits = tf.layers.dense(net, params['n_classes'], activation=None)
 
@@ -114,7 +114,6 @@ def model_fn(features, labels, mode, params):
 
 features = tf.feature_column.numeric_column("features", shape=[30])
 
-# save_summary_steps every 5 and save checkpoints every 900 sec
 params = {"feature_columns": [features], "n_classes": 2, "learning_rate": 0.001, "hidden_units": [40, 20, 20]}
 
 estimator = tf.estimator.Estimator(config=tf.estimator.RunConfig(
@@ -125,7 +124,7 @@ eval_spec = tf.estimator.EvalSpec(input_fn=test_input_fn, steps=35, throttle_sec
 
 tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
 
-
+"""
 # iterating through dataset for debugging purposes
 test_train_dataset = train_input_fn()
 
@@ -133,3 +132,4 @@ iterator = test_train_dataset.make_one_shot_iterator()
 
 next_element = iterator.get_next()
 print(next_element)
+"""
